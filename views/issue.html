@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Welcome to HyperDev!</title>
+    <meta name="description" content="A cool thing made with HyperDev" />
+    <link
+      id="favicon"
+      rel="icon"
+      href="https://hyperdev.com/favicon-app.ico"
+      type="image/x-icon"
+    />
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/public/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1 id="projectTitle"></h1>
+    </header>
+    <center>
+      <div id="submitNewIssue">
+        <br />
+        <h3>Submit a new issue:</h3>
+        <form id="newIssue" method="post" action="/api/">
+          <input
+            type="text"
+            name="issue_title"
+            placeholder="*Title"
+            style="width: 320px; margin-bottom: 3px;"
+            required
+          /><br />
+          <textarea
+            type="text"
+            name="issue_text"
+            placeholder="*Text"
+            style="width: 320px; height: 100px;"
+            required
+          ></textarea
+          ><br />
+          <input
+            type="text"
+            name="created_by"
+            placeholder="*Created by"
+            style="width: 100px;"
+            required
+          />
+          <input
+            type="text"
+            name="assigned_to"
+            placeholder="(opt)Assigned to"
+            style="width: 100px;"
+          />
+          <input
+            type="text"
+            name="status_text"
+            placeholder="(opt)Status text"
+            style="width: 100px;"
+          /><br />
+          <button type="submit">Submit Issue</button>
+        </form>
+      </div>
+
+      <div id="issueDisplay"></div>
+
+      <hr style="margin: 50px; margin-top: 200px;" />
+    </center>
+
+    <script>
+      const currentProject = window.location.pathname.replace(/\//g, '');
+      const url = `/api/issues/${currentProject}`;
+
+      document.getElementById(
+        'projectTitle'
+      ).textContent = `All issues for: ${currentProject}`;
+
+      const issueDisplay = document.getElementById('issueDisplay');
+      const newIssueForm = document.getElementById('newIssue');
+
+      fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+          for (let i = 0; i < data.length; i++) {
+            const div = document.createElement('div');
+            const openStatus = data[i].open ? 'open' : 'closed';
+            div.className = `issue ${openStatus}`;
+            div.innerHTML = `<p class="id">${data[i]._id}</p>
+                          <h3>${data[i].issue_title}</h3>
+                          <br>
+                          <p>${data[i].issue_text}</p>
+                          <p>${data[i].status_text}</p>
+                          <br>
+                          <p class="id">
+                            <b>Created by: </b>
+                            ${data[i].created_by}
+                            <b> Assigned to: </b>
+                            ${data[i].assigned_to}
+                          </p>
+                          <p class="id">
+                            <b>Created on: </b>
+                            ${data[i].created_on}
+                            <b> Last updated: </b>
+                            ${data[i].updated_on}
+                          </p>
+                          <br>
+                          <a href="#" class="closeIssue" id=${data[i]._id}>close?</a>
+                          <a href="#" class="deleteIssue" id=${data[i]._id}>delete?</a>`;
+            issueDisplay.appendChild(div);
+          }
+          handleCloseAndDelete();
+        })
+        .catch((err) => {
+          console.log('Error: ', err);
+        });
+
+      newIssueForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const inputs = e.target.elements;
+        const body = JSON.stringify({
+          issue_title: inputs.issue_title.value,
+          issue_text: inputs.issue_text.value,
+          created_by: inputs.created_by.value,
+          assigned_to: inputs.assigned_to.value,
+          status_text: inputs.status_text.value,
+        });
+
+        fetch(url, {
+          method: 'POST',
+          body: body,
+          headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            window.location.reload();
+          })
+          .catch((err) => {
+            console.log('Error:', err);
+          });
+      });
+
+      function handleCloseAndDelete() {
+        const closeIssueBtns = Array.from(
+          document.getElementsByClassName('closeIssue')
+        );
+        const deleteIssueBtns = Array.from(
+          document.getElementsByClassName('deleteIssue')
+        );
+
+        closeIssueBtns.forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const body = JSON.stringify({
+              _id: e.target.getAttribute('id'),
+              closed: 'true',
+            });
+            console.log(body);
+            fetch(url, {
+              method: 'PUT',
+              body: body,
+              headers: { 'Content-Type': 'application/json;charset=utf-8' },
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                console.log(data);
+                window.location.reload();
+              })
+              .catch((err) => {
+                console.log('Error: ', err);
+              });
+          });
+        });
+
+        deleteIssueBtns.forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const body = JSON.stringify({
+              _id: e.target.id,
+            });
+            fetch(url, {
+              method: 'DELETE',
+              body: body,
+              headers: { 'Content-Type': 'application/json;charset=utf-8' },
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                window.location.reload();
+              })
+              .catch((err) => {
+                console.log('Error: ', err);
+              });
+          });
+        });
+      }
+    </script>
+  </body>
+</html>
