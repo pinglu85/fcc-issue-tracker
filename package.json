@@ -1,5 +1,5 @@
 {
-  "name": "my-hyperdev-app",
+  "name": "fcc-issue-tracker",
   "version": "0.0.1",
   "description": "What am I about?",
   "main": "server.js",
