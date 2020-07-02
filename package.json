@@ -1,7 +1,7 @@
 {
   "name": "fcc-issue-tracker",
   "version": "0.0.1",
-  "description": "What am I about?",
+  "description": "FCC: Project Issue Tracker",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
