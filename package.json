@@ -20,9 +20,6 @@
     "mongodb": "^4.6.0",
     "zombie": "^6.1.4"
   },
-  "engines": {
-    "node": "4.4.3"
-  },
   "repository": {
     "type": "git",
     "url": "https://hyperdev.com/#!/project/welcome-project"
